@@ -32,8 +32,12 @@ const createImgElement = (src) => {
 const loadImages = (uprn, longitude, latitude, extension = "png") => {
 	longitude -= longitude % 250;
 	latitude -= latitude % 250;
-	aerial.src = `img/aerial/${longitude}_${latitude}.png`;
 
+	DOM.imgContainer.replaceChildren();
+
+	const aerialImgElement = createImgElement(`img/aerial/${longitude}_${latitude}.png`);
+	DOM.imgContainer.appendChild(aerialImgElement);
+	
 	for (let i = 1; i < 10; i++) {
 		const imgElement = createImgElement(`img/${uprn}/${uprn}-${i}.${extension}`);
 		DOM.imgContainer.appendChild(imgElement);
@@ -64,11 +68,15 @@ socket.addEventListener("message", (event) => {
 			const data = JSON.parse(reader.result);
 			// console.log(data);
 
+			// Set Text Data
 			for (const key in data) {
 				const element = DOM[key];
 				const value = data[key];
 				if (element) element.innerText = (value == null) ? "" : value;
 			}
+
+			// Load Images
+			loadImages(data.uPRN, data.longitude, data.latitude, "jpg");
 		};
 
 		reader.readAsText(event.data);
@@ -82,5 +90,3 @@ DOM.aerial.addEventListener("click", (event) => {
 	if (document.fullscreenElement) document.exitFullscreen();
 	else DOM.aerial.requestFullscreen();
 });
-
-loadImages("133000816", 321564, 863043, "jpg");
