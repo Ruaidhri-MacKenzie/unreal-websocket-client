@@ -21,10 +21,10 @@
 :root {
 	--colour-brand: hsl(296 57% 30%);
 	--colour-brand-text: hsl(0 0% 100%);
-	--colour-main: hsl(0 0% 100%);
-	--colour-main-text: hsl(0 0% 0%);
-	--colour-list-1: hsl(0 0% 98%);
-	--colour-list-2: hsl(0 0% 95%);
+	--colour-main: hsl(0 0% 10%);
+	--colour-main-text: hsl(0 0% 90%);
+	--colour-list-1: hsl(0 0% 12%);
+	--colour-list-2: hsl(0 0% 15%);
 }
 
 body {
