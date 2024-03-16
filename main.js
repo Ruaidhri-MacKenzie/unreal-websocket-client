@@ -4,6 +4,7 @@ const socket = new WebSocket(`ws://${HOST}:${PORT}`);
 
 const DOM = {
 	imgContainer: document.querySelector(".image-container"),
+	aerial: document.getElementById("aerial"),
 	uPRN: document.getElementById("uprn"),
 	longitude: document.getElementById("longitude"),
 	latitude: document.getElementById("latitude"),
@@ -21,12 +22,20 @@ const createImgElement = (src) => {
 	element.classList.add("preview");
 	element.src = src;
 	element.setAttribute("alt", "Preview image");
+	element.addEventListener("click", (event) => {
+		if (document.fullscreenElement) document.exitFullscreen();
+		else element.requestFullscreen();
+	});
 	return element;
 };
 
-const loadImages = (directoryName, extension = "png") => {
+const loadImages = (uprn, longitude, latitude, extension = "png") => {
+	longitude -= longitude % 250;
+	latitude -= latitude % 250;
+	aerial.src = `img/aerial/${longitude}_${latitude}.png`;
+
 	for (let i = 1; i < 10; i++) {
-		const imgElement = createImgElement(`img/${directoryName}/${directoryName}${i}.${extension}`);
+		const imgElement = createImgElement(`img/${uprn}/${uprn}-${i}.${extension}`);
 		DOM.imgContainer.appendChild(imgElement);
 	}
 };
@@ -69,4 +78,9 @@ socket.addEventListener("message", (event) => {
 	}
 });
 
-loadImages("elgin", "jpg");
+DOM.aerial.addEventListener("click", (event) => {
+	if (document.fullscreenElement) document.exitFullscreen();
+	else DOM.aerial.requestFullscreen();
+});
+
+loadImages("133000816", 321564, 863043, "jpg");
