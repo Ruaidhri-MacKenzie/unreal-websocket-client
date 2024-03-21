@@ -6,6 +6,8 @@
 	<title>Unreal WebSocket Client</title>
 	<link rel="shortcut icon" href="img/favicon.png" type="image/png">
 	<link rel="stylesheet" href="style.css">
+	<script src="lib/three.min.js"></script>
+	<script src="lib/panolens.min.js"></script>
 	<script type="module" src="main.js"></script>
 </head>
 <body>
@@ -16,7 +18,9 @@
 		</header>
 
 		<main>
-			<section class="data-container">
+			<div class="splash-container hidden"></div>
+
+			<section class="data-container hidden">
 				<ul>
 					<li>
 						<p>Name:</p>
@@ -60,10 +64,11 @@
 					</li>
 				</ul>
 			</section>
-
-			<section class="image-container">
-				<img id="aerial" class="preview" src="img/aerial/321500_863000.png" alt="Aerial preview">
+			
+			<section class="image-container hidden">
 			</section>
+
+			<div class="panorama-container"></div>
 		</main>
 
 		<footer>

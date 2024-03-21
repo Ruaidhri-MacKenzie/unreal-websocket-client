@@ -55,8 +55,6 @@ header {
 main {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	padding: 1em;
-	gap: 1em;
 }
 
 footer {
@@ -68,6 +66,7 @@ footer {
 
 section {
 	overflow-y: scroll;
+	padding: 1em;
 	border-radius: 5px;
 }
 
@@ -103,4 +102,17 @@ li:nth-child(2n) {
 	width: 100%;
 	height: auto;
 	border-radius: 5px;
+}
+
+.hidden {
+	display: none;
+}
+
+.splash-container {
+	grid-column: -1 / 1;
+	background-color: var(--colour-brand);
+}
+
+.panorama-container {
+	grid-column: -1 / 1;
 }

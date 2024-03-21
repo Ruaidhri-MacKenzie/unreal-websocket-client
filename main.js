@@ -1,10 +1,14 @@
+const TILESIZE_X = 250;
+const TILESIZE_Y = 250;
 const HOST = "127.0.0.1";
 const PORT = 2000;
-const socket = new WebSocket(`ws://${HOST}:${PORT}`);
-
 const DOM = {
-	imgContainer: document.querySelector(".image-container"),
-	aerial: document.getElementById("aerial"),
+	layout: document.querySelector(".layout"),
+	splashContainer: document.querySelector(".splash-container"),
+	dataContainer: document.querySelector(".data-container"),
+	imageContainer: document.querySelector(".image-container"),
+	panoramaContainer: document.querySelector(".panorama-container"),
+
 	uPRN: document.getElementById("uprn"),
 	longitude: document.getElementById("longitude"),
 	latitude: document.getElementById("latitude"),
@@ -17,7 +21,48 @@ const DOM = {
 	ePCRating: document.getElementById("epc-rating"),
 };
 
-const createImgElement = (src) => {
+// Create WebSocket client
+const socket = new WebSocket(`ws://${HOST}:${PORT}`);
+
+// Create panorama viewer
+const panoramaViewer = new PANOLENS.Viewer({
+	container: DOM.panoramaContainer,
+	controlBar: false,
+});
+
+const showSplash = () => {
+	DOM.dataContainer.classList.add("hidden");
+	DOM.imageContainer.classList.add("hidden");
+	DOM.panoramaContainer.classList.add("hidden");
+
+	DOM.splashContainer.classList.remove("hidden");
+};
+
+const showBuildingData = () => {
+	DOM.splashContainer.classList.add("hidden");
+	DOM.panoramaContainer.classList.add("hidden");
+
+	DOM.dataContainer.classList.remove("hidden");
+	DOM.imageContainer.classList.remove("hidden");
+};
+
+const showPanorama = () => {
+	DOM.splashContainer.classList.add("hidden");
+	DOM.dataContainer.classList.add("hidden");
+	DOM.imageContainer.classList.add("hidden");
+
+	DOM.panoramaContainer.classList.remove("hidden");
+};
+
+const populateDataList = (data) => {
+	for (const key in data) {
+		const element = DOM[key];
+		const value = data[key];
+		if (element) element.innerText = (value == null) ? "" : value;
+	}
+};
+
+const createImageElement = (src) => {
 	const element = document.createElement("img");
 	element.classList.add("preview");
 	element.src = src;
@@ -29,21 +74,40 @@ const createImgElement = (src) => {
 	return element;
 };
 
-const loadImages = (uprn, longitude, latitude, extension = "png") => {
-	longitude -= longitude % 250;
-	latitude -= latitude % 250;
+const loadImages = (longitude, latitude, uprn) => {
+	DOM.imageContainer.replaceChildren();
+	loadAerialImage(longitude, latitude);
+	loadThermalImages(longitude, latitude, uprn, 10);
+};
 
-	DOM.imgContainer.replaceChildren();
+const loadAerialImage = (longitude, latitude) => {
+	longitude -= longitude % TILESIZE_X;
+	latitude -= latitude % TILESIZE_Y;
 
-	const aerialImgElement = createImgElement(`img/aerial/${longitude}_${latitude}.png`);
-	DOM.imgContainer.appendChild(aerialImgElement);
-	
-	for (let i = 1; i < 10; i++) {
-		const imgElement = createImgElement(`img/${uprn}/${uprn}-${i}.${extension}`);
-		DOM.imgContainer.appendChild(imgElement);
+	const imageElement = createImageElement(`img/${longitude}_${latitude}/aerial/${longitude}_${latitude}-aerial.png`);
+	DOM.imageContainer.appendChild(imageElement);
+};
+
+const loadThermalImages = (longitude, latitude, uprn, imageCount) => {
+	longitude -= longitude % TILESIZE_X;
+	latitude -= latitude % TILESIZE_Y;
+
+	for (let i = 0; i < imageCount; i++) {
+		const imageElement = createImageElement(`img/${longitude}_${latitude}/${uprn}/thermal/${uprn}-thermal-${i}.jpg`);
+		DOM.imageContainer.appendChild(imageElement);
 	}
 };
 
+const loadPanoramicImage = (longitude, latitude, uprn, index = 0) => {
+	longitude -= longitude % TILESIZE_X;
+	latitude -= latitude % TILESIZE_Y;
+
+	const panoramaImage = new PANOLENS.ImagePanorama(`img/${longitude}_${latitude}/${uprn}/panoramic/${uprn}-panoramic-${index}.jpg`);
+	panoramaViewer.add(panoramaImage);
+	panoramaViewer.setPanorama(panoramaImage);
+};
+
+// Bind socket events
 socket.addEventListener("open", (event) => {
 	console.log("Connected");
 	
@@ -69,14 +133,10 @@ socket.addEventListener("message", (event) => {
 			// console.log(data);
 
 			// Set Text Data
-			for (const key in data) {
-				const element = DOM[key];
-				const value = data[key];
-				if (element) element.innerText = (value == null) ? "" : value;
-			}
+			populateDataList(data);
 
 			// Load Images
-			loadImages(data.uPRN, data.longitude, data.latitude, "jpg");
+			loadImages(data.longitude, data.latitude, data.uPRN);
 		};
 
 		reader.readAsText(event.data);
@@ -86,7 +146,24 @@ socket.addEventListener("message", (event) => {
 	}
 });
 
-DOM.aerial.addEventListener("click", (event) => {
-	if (document.fullscreenElement) document.exitFullscreen();
-	else DOM.aerial.requestFullscreen();
+document.addEventListener("keydown", (event) => {
+	// console.log(event.key);
+	if (event.key === "1") {
+		showSplash();
+	}
+	else if (event.key === "2") {
+		showBuildingData();
+	}
+	else if (event.key === "3") {
+		showPanorama();
+	}
+	else if (event.key === "Enter") {
+		DOM.layout.requestFullscreen();
+	}
+	else if (event.key === " ") {
+		loadPanoramicImage(321500, 863000, 133000816, 1);
+	}
 });
+
+loadPanoramicImage(321500, 863000, 133000816);
+showSplash();
