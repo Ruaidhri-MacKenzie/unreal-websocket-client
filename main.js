@@ -77,7 +77,7 @@ const createImageElement = (src) => {
 const loadImages = (longitude, latitude, uprn) => {
 	DOM.imageContainer.replaceChildren();
 	loadAerialImage(longitude, latitude);
-	loadThermalImages(longitude, latitude, uprn, 10);
+	loadThermalImages(longitude, latitude, uprn, 9);
 };
 
 const loadAerialImage = (longitude, latitude) => {
@@ -129,14 +129,25 @@ socket.addEventListener("message", (event) => {
 		const reader = new FileReader();
 
 		reader.onload = () => {
-			const data = JSON.parse(reader.result);
-			// console.log(data);
+			if (reader.result === "Splash") {
+				showSplash();
+			}
+			else if (reader.result === "BuildingData") {
+				showBuildingData();
+			}
+			else if (reader.result === "Panorama") {
+				showPanorama();
+			}
+			else {
+				const data = JSON.parse(reader.result);
+				// console.log(data);
 
-			// Set Text Data
-			populateDataList(data);
-
-			// Load Images
-			loadImages(data.longitude, data.latitude, data.uPRN);
+				// Set Text Data
+				populateDataList(data);
+				
+				// Load Images
+				loadImages(data.longitude, data.latitude, data.uPRN);	
+			}
 		};
 
 		reader.readAsText(event.data);
@@ -166,4 +177,5 @@ document.addEventListener("keydown", (event) => {
 });
 
 loadPanoramicImage(321500, 863000, 133000816);
+loadPanoramicImage(321500, 863000, 133000816, 1);
 showSplash();
